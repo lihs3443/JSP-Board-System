@@ -1,0 +1,8 @@
+// DAO 데이터베이스 접근 객체
+// 글 관련 
+
+package bbs;
+
+public class BbsDAO {
+
+}
