@@ -58,6 +58,15 @@
 						data-toggle="dropdown" role="button" aria-haspopup="true"
 						aria-expanded="false">회원관리<span class="caret"></span></a>
 					<ul class="dropdown-menu">
+						<li><a href="commentList.jsp">내 댓글보기</a>
+						<li><a href="message.jsp">쪽지</a>
+					<%
+						if(userID.equals("admin")){
+					%>
+						<li><a href="admin.jsp">관리하기</a>
+					<%
+						}
+					%>
 						<li><a href="logoutAction.jsp">로그아웃</a></li>
 					</ul>
 				</li>
@@ -67,13 +76,6 @@
 			%>			
 		</div>
 	</nav>
-	<div class="container">
-		<div class="jumbotron">
-			<div class="container">
-				<h1>웹 사이트 소개</h1>
-			</div>
-		</div>
-	</div>
 	<script src="http://code.jquery.com/jquery-3.1.1.min.js"></script>
 	<script src="js/bootstrap.js"></script>
 </body>

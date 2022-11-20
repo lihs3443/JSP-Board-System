@@ -7,6 +7,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.ArrayList;
 
 public class UserDAO {
 	private Connection conn;
@@ -63,6 +64,46 @@ public class UserDAO {
 			e.printStackTrace();
 		}
 		return -1;
+	}
+	
+	public User getUser(String userID) {
+		String SQL = "select * from user where userID=?;";
+		User user = new User();
+		try {
+			pstmt = conn.prepareStatement(SQL);
+			pstmt.setString(1, userID);
+			rs = pstmt.executeQuery();
+			rs.next();
+			user.setUserID(rs.getString(1));
+			user.setUserPassword(rs.getString(2));
+			user.setUserName(rs.getString(3));
+			user.setUserGender(rs.getString(4));
+			user.setUserEmail(rs.getString(5));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return user;
+	}
+	
+	public ArrayList<User> getUser() {
+		String SQL = "select * from user where userID!='admin';";
+		ArrayList<User> list = new ArrayList<User>();
+		try {
+			pstmt = conn.prepareStatement(SQL);
+			rs = pstmt.executeQuery();
+			while(rs.next()) {
+				User user = new User();
+				user.setUserID(rs.getString(1));
+				user.setUserPassword(rs.getString(2));
+				user.setUserName(rs.getString(3));
+				user.setUserGender(rs.getString(4));
+				user.setUserEmail(rs.getString(5));
+				list.add(user);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return list;
 	}
 }
 

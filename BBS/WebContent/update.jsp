@@ -69,6 +69,14 @@
 						data-toggle="dropdown" role="button" aria-haspopup="true"
 						aria-expanded="false">회원관리<span class="caret"></span></a>
 					<ul class="dropdown-menu">
+						<li><a href="commentList.jsp">내 댓글보기</a>
+					<%
+					if(userID.equals("admin")){
+					%>
+						<li><a href="admin.jsp">관리하기</a>
+					<%
+					}
+					%>
 						<li><a href="logoutAction.jsp">로그아웃</a></li>
 					</ul>
 				</li>

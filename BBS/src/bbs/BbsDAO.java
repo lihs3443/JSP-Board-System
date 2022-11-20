@@ -27,7 +27,7 @@ public class BbsDAO {
 	}
 	
 	public String getDate() {
-		String SQL = "select date_format(now(),'%Y-%m-%d')";
+		String SQL = "select now()";
 		try {
 			PreparedStatement pstmt = conn.prepareStatement(SQL);
 			rs = pstmt.executeQuery();
@@ -72,14 +72,21 @@ public class BbsDAO {
 		return -1; // 데이터베이스 오류
 	}
 	
-	public ArrayList<Bbs> getList(int pageNumber) {
-		String SQL = "select * from bbs where bbsID <= ? and bbsAvailable = 1 order by bbsID asc limit ?, ?";
+	public ArrayList<Bbs> getList(String search) {
+		String SQL;
+		PreparedStatement pstmt;
 		ArrayList<Bbs> list = new ArrayList<Bbs>();
 		try {
-			PreparedStatement pstmt = conn.prepareStatement(SQL);
-			pstmt.setInt(1, pageNumber*10);
-			pstmt.setInt(2, pageNumber*10-10);
-			pstmt.setInt(3, pageNumber*10);
+			if (search.equals("")) {
+				SQL = "select * from bbs where bbsAvailable = 1 order by bbsID";
+				pstmt = conn.prepareStatement(SQL);
+			}
+			else {
+				SQL = "select * from bbs where bbsAvailable = 1 and bbsTitle like ? order by bbsID";
+				pstmt = conn.prepareStatement(SQL);
+				pstmt.setString(1, "%"+search+"%");
+			}
+
 			rs = pstmt.executeQuery();
 			while (rs.next()) {
 				Bbs bbs = new Bbs();
@@ -97,19 +104,41 @@ public class BbsDAO {
 		return list;
 	}
 	
-	public boolean nextPage(int pageNumber) {
-		String SQL = "select * from bbs where bbsID < ? and bbsAvailable = 1";
+	public ArrayList<Bbs> getList(int pageNumber,String search) {
+		String SQL;
+		PreparedStatement pstmt;
+		ArrayList<Bbs> list = new ArrayList<Bbs>();
 		try {
-			PreparedStatement pstmt = conn.prepareStatement(SQL);
-			pstmt.setInt(1, getNext() - (pageNumber - 1) * 10);
+			if(search.equals("")) {
+				SQL = "select * from bbs where bbsID <= ? and bbsAvailable = 1 order by bbsID asc limit ?, ?";
+				pstmt = conn.prepareStatement(SQL);
+				pstmt.setInt(1, pageNumber*10);
+				pstmt.setInt(2, pageNumber*10-10);
+				pstmt.setInt(3, pageNumber*10);
+			}else {
+				SQL = "select * from bbs where bbsID <= ? and bbsAvailable = 1 and bbsTitle like ? order by bbsID asc limit ?, ?";
+				pstmt = conn.prepareStatement(SQL);
+				pstmt.setInt(1, pageNumber*10);
+				pstmt.setString(2, "%"+search+"%");
+				pstmt.setInt(3, pageNumber*10-10);
+				pstmt.setInt(4, pageNumber*10);
+			}
+			
 			rs = pstmt.executeQuery();
 			while (rs.next()) {
-				return true;
+				Bbs bbs = new Bbs();
+				bbs.setBbsID(rs.getInt(1));
+				bbs.setBbsTitle(rs.getString(2));
+				bbs.setUserID(rs.getString(3));
+				bbs.setBbsDate(rs.getString(4));
+				bbs.setBbsContent(rs.getString(5));
+				bbs.setBbsAvailable(rs.getInt(6));
+				list.add(bbs);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return false;
+		return list;
 	}
 	
 	public Bbs getBbs(int bbsID) {

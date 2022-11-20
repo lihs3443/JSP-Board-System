@@ -1,8 +1,10 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-    pageEncoding="UTF-8"%>
+<%@page import="javafx.scene.control.Alert"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.io.PrintWriter" %>
 <%@ page import="bbs.BbsDAO"%>
 <%@ page import="bbs.Bbs"%>
+<%@ page import="user.UserDAO"%>
+<%@ page import="user.User"%>
 <%@ page import="java.util.ArrayList"%>
 <!DOCTYPE html>
 <html>
@@ -25,8 +27,14 @@
 			userID = (String)session.getAttribute("userID");
 		}
 		int pageNumber = 1;
+		int pageNum = 1;
 		if(request.getParameter("pageNumber") != null){
 			pageNumber = Integer.parseInt(request.getParameter("pageNumber"));
+		}
+		String search ="";
+		
+		if(request.getParameter("search") != null){
+			search = request.getParameter("search");
 		}
 	%>
 
@@ -71,6 +79,15 @@
 						data-toggle="dropdown" role="button" aria-haspopup="true"
 						aria-expanded="false">회원관리<span class="caret"></span></a>
 					<ul class="dropdown-menu">
+						<li><a href="commentList.jsp">내 댓글보기</a>
+						<li><a href="message.jsp">쪽지</a>
+					<%
+					if(userID.equals("admin")){
+					%>
+						<li><a href="admin.jsp">관리하기</a>
+					<%
+						}
+					%>
 						<li><a href="logoutAction.jsp">로그아웃</a></li>
 					</ul>
 				</li>
@@ -81,10 +98,23 @@
 		</div>
 	</nav>
 	<div class="container">
-		<div class="row"> <!-- table-striped: 2가지 색상이 번갈아가면서 변경됨 -->
+		<div class="row">
+			<form method="get" action="bbs.jsp">
+				<div style="text-align: right; margin-bottom: 10px;">
+					<input type="text" placeholder="검색어 입력" name="search" maxlength="50">
+					<button type="submit" class="btn btn-primary">검색</button>
+				</div>
+			</form>
+			<%
+				BbsDAO bbsDAO = new BbsDAO();
+				ArrayList<Bbs> list = bbsDAO.getList(pageNumber,search);
+				pageNum = bbsDAO.getList(search).size()/10;
+				if(bbsDAO.getList(search).size()%10 > 0)
+					pageNum += 1;
+			%>
 			<table class="table table-striped" style="text-align: center; border: 1px solid #dddddd">
-				<thead> <!-- 테이블 제목부분 (속성부분)-->
-					<tr> <!-- tr: 행 th: 속성-->
+				<thead>
+					<tr> 
 						<th style="background-color: #eeeeee; text-align: center;">번호</th>
 						<th style="background-color: #eeeeee; text-align: center;">제목</th>
 						<th style="background-color: #eeeeee; text-align: center;">작성자</th>
@@ -93,14 +123,13 @@
 				</thead>
 				<tbody>
 					<%	
-						BbsDAO bbsDAO = new BbsDAO();
-						ArrayList<Bbs> list = bbsDAO.getList(pageNumber);
 						for(int i = 0; i < list.size();i++){
+							User user = new UserDAO().getUser(list.get(i).getUserID());
 					%>
 					<tr>
-						<td> <%= list.get(i).getBbsID() %></td>
-						<td> <a href="view.jsp?bbsID=<%= list.get(i).getBbsID()%>"><%= list.get(i).getBbsTitle().replaceAll(" ", "&nbsp;").replaceAll("<", "&lt;").replaceAll(">","&gt;").replaceAll("\n", "<br>") %></a></td>
-						<td> <%= list.get(i).getUserID() %></td>
+						<td> <%= 10*(pageNumber-1)+i+1 %></td>
+						<td> <a href="view.jsp?bbsID=<%= list.get(i).getBbsID()%>" style="color: black;"><%= list.get(i).getBbsTitle().replaceAll(" ", "&nbsp;").replaceAll("<", "&lt;").replaceAll(">","&gt;").replaceAll("\n", "<br>") %></a></td>
+						<td> <%= user.getUserName() %></td>
 						<td> <%= list.get(i).getBbsDate() %></td>
 					</tr>
 					<%	
@@ -108,19 +137,18 @@
 					%>
 				</tbody>
 			</table>
-			<%
-				if(pageNumber != 1) {
-			%>
-				<a href="bbs.jsp?pageNumber=<%=pageNumber-1 %>" class="btn btn-success btn-arraw-left">이전</a>
-			<%
-				}
-				if(bbsDAO.nextPage(pageNumber + 1)) {
-			%>
-				<a href="bbs.jsp?pageNumber=<%=pageNumber+1 %>" class="btn btn-success btn-arraw-right">다음</a>
-			<%
-				}
-			%>
-			<a href="write.jsp" class="btn btn-primary pull-right">글쓰기</a>
+			<div style="text-align: center; margin-top: 100px;">
+				<span>(( </span>
+				<%
+					for(int i = 1; i <= pageNum; i++){
+				%>
+					<a href="bbs.jsp?pageNumber=<%= i %>&search=<%=search%>"><%= i %></a>
+				<%
+					}
+				%>
+				<span> ))</span>
+				<a href="write.jsp" class="btn btn-primary pull-right" style="float: right;">글쓰기</a>
+			</div>
 		</div>
 	</div>
 	<script src="http://code.jquery.com/jquery-3.1.1.min.js"></script>

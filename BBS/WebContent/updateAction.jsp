@@ -3,8 +3,16 @@
     pageEncoding="UTF-8"%>
 <%@ page import="bbs.BbsDAO" %>
 <%@ page import="bbs.Bbs" %>
+<%@ page import="bbsComment.BbsCommentDAO" %>
+<%@ page import="bbsComment.BbsComment" %>
+<%@ page import="bbsReply.BbsReplyDAO" %>
+<%@ page import="bbsReply.BbsReply" %>
 <%@ page import="java.io.PrintWriter" %>
 <% request.setCharacterEncoding("UTF-8"); %>
+<jsp:useBean id="bbsComment" class="bbsComment.BbsComment" scope="page"/>
+<jsp:useBean id="bbsReply" class="bbsReply.BbsReply" scope="page"/>
+<jsp:setProperty name="bbsComment" property="commentContent"/>
+<jsp:setProperty name="bbsReply" property="replyContent"/>
 <!DOCTYPE html>
 <html>
 <head>
@@ -45,6 +53,82 @@
 			script.println("history.back()");
 			script.println("</script>");
 		}
+		
+		int commentID = 0;
+		int replyID = 0;
+		if(request.getParameter("replyID") != null){
+			replyID = Integer.parseInt(request.getParameter("replyID"));
+			if(replyID == 0){
+				PrintWriter script = response.getWriter();
+				script.println("<script>");
+				script.println("alert('유효하지 않은 댓글입니다')");
+				script.println("history.back()");
+				script.println("</script>");
+			}
+			
+			BbsReply reply = new BbsReplyDAO().getBbsReplyID(replyID);
+			if(!userID.equals(reply.getUserID())){
+				PrintWriter script = response.getWriter();
+				script.println("<script>");
+				script.println("alert('권한이 없습니다.')");
+				script.println("history.back()");
+				script.println("</script>");
+			}
+			else{
+				BbsReplyDAO bbsReplyDAO = new BbsReplyDAO();
+				int result = bbsReplyDAO.update(bbsReply.getReplyContent(),replyID);
+				if(result == -1){
+					PrintWriter script = response.getWriter();
+					script.println("<script>");
+					script.println("alert('댓글 수정에 실패하였습니다.')");
+					script.println("history.back()");
+					script.println("</script>");
+				}
+				else{
+					PrintWriter script = response.getWriter();
+					script.println("<script>");
+					script.println("location.href = 'view.jsp?bbsID="+bbsID+"'");
+					script.println("</script>");
+				}
+			}
+		}
+		else if(request.getParameter("commentID") != null){
+			
+			commentID = Integer.parseInt(request.getParameter("commentID"));
+			if(commentID == 0){
+				PrintWriter script = response.getWriter();
+				script.println("<script>");
+				script.println("alert('유효하지 않은 댓글입니다')");
+				script.println("history.back()");
+				script.println("</script>");
+			}
+			
+			BbsComment comment = new BbsCommentDAO().getBbsCommentID(commentID);
+			if(!userID.equals(comment.getUserID())){
+				PrintWriter script = response.getWriter();
+				script.println("<script>");
+				script.println("alert('권한이 없습니다.')");
+				script.println("history.back()");
+				script.println("</script>");
+			}
+			else{
+				BbsCommentDAO bbsCommentDAO = new BbsCommentDAO();
+				int result = bbsCommentDAO.update(bbsComment.getCommentContent(),commentID);
+				if(result == -1){
+					PrintWriter script = response.getWriter();
+					script.println("<script>");
+					script.println("alert('댓글 수정에 실패하였습니다.')");
+					script.println("history.back()");
+					script.println("</script>");
+				}
+				else{
+					PrintWriter script = response.getWriter();
+					script.println("<script>");
+					script.println("location.href = 'view.jsp?bbsID="+bbsID+"'");
+					script.println("</script>");
+				}
+			}
+		}		
 		else{
 			if(request.getParameter("bbsTitle") == null || request.getParameter("bbsContent") == null ||
 					request.getParameter("bbsTitle").equals(" ") || request.getParameter("bbsContent").equals(" ")){

@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <qualifiedTypeNameHistroy>
-<fullyQualifiedTypeName name="java.util.ArrayList"/>
+<fullyQualifiedTypeName name="bbsComment.BbsComment"/>
+<fullyQualifiedTypeName name="com.sun.java.util.jar.pack.Instruction.Switch"/>
+<fullyQualifiedTypeName name="bbsReply.BbsReply"/>
 <fullyQualifiedTypeName name="java.sql.PreparedStatement"/>
+<fullyQualifiedTypeName name="java.util.ArrayList"/>
+<fullyQualifiedTypeName name="java.lang.System"/>
+<fullyQualifiedTypeName name="java.io.Console"/>
 </qualifiedTypeNameHistroy>

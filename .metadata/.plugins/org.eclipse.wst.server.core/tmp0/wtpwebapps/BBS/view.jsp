@@ -1,15 +1,28 @@
+<%@page import="user.UserDAO"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@ page import="java.io.PrintWriter" %>
 <%@ page import="bbs.Bbs" %>
 <%@ page import="bbs.BbsDAO" %>
+<%@ page import="user.User" %>
+<%@ page import="user.UserDAO" %>
+<%@ page import="bbsComment.BbsComment" %>
+<%@ page import="bbsComment.BbsCommentDAO" %>
+<%@ page import="bbsReply.BbsReply" %>
+<%@ page import="bbsReply.BbsReplyDAO" %>
+<%@ page import="java.util.ArrayList"%>
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width", initial-scale="1">
 <link rel="stylesheet" href="css/bootstrap.css">
+<script src="https://kit.fontawesome.com/31b51bb94e.js"></script>
 <title>JSP 게시판 웹 사이트</title>
+<style type="text/css">
+	textarea {
+	resize: none;
+}
+</style>
 </head>
 <body>
 	<%
@@ -29,6 +42,7 @@
 			script.println("</script>");
 		}
 		Bbs bbs = new BbsDAO().getBbs(bbsID);
+		User user = new UserDAO().getUser(userID);
 	%>
 
 	<nav class="navbar navbar-default"> <!-- 웹사이트 전반적인 구성 -->
@@ -72,6 +86,15 @@
 						data-toggle="dropdown" role="button" aria-haspopup="true"
 						aria-expanded="false">회원관리<span class="caret"></span></a>
 					<ul class="dropdown-menu">
+						<li><a href="commentList.jsp">내 댓글보기</a>
+						<li><a href="message.jsp">쪽지</a>
+					<%
+					if(userID.equals("admin")){
+					%>
+						<li><a href="admin.jsp">관리하기</a>
+					<%
+					}
+					%>
 						<li><a href="logoutAction.jsp">로그아웃</a></li>
 					</ul>
 				</li>
@@ -96,7 +119,7 @@
 						</tr>
 						<tr> 
 							<td>작성자</td>
-							<td colspan="2"><%= bbs.getUserID() %></td>
+							<td colspan="2"><%= user.getUserName() %></td>
 						</tr>
 						<tr> 
 							<td>작성일자</td>
@@ -119,7 +142,123 @@
 				<%
 					}
 				%>
-				<input type="submit" href="write.jsp" class="btn btn-primary pull-right" value="글쓰기">
+				<!-- <input type="submit" href="write.jsp" class="btn btn-primary pull-right" value="글쓰기"> -->
+				<table class="table" style="text-align:center;border: 1px solid #dddddd; margin-top: 20px; margin-bottom: 0px;">
+					<thead>
+						<tr>
+							<th colspan="2" style="background-color: #eeeeee;">댓글</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td style="text-align: left;">
+								<%	
+								BbsCommentDAO bbsCommentDAO = new BbsCommentDAO();
+								ArrayList<BbsComment> list = bbsCommentDAO.getList(bbsID);
+								for(int i = 0; i < list.size();i++){
+									User user1name = new UserDAO().getUser(userID);
+									User username = new UserDAO().getUser(list.get(i).getUserID());
+								%>
+									<div style="border-bottom: 1px solid #dddddd;">		
+										<div style="padding-bottom: 10px; padding-top: 10px;">						
+											<div style="margin-bottom: 10px;">
+												<div class="commentContainer" style="display: flex;">
+													<div class="commentItem">
+														<span style="font-size: 18px"><%=username.getUserName()%></span>
+														<span style="color: #aaaaaa;">(<%=list.get(i).getCommentDate()%>)</span>
+														<%
+														if(userID != null && userID.equals(list.get(i).getUserID())){
+														%>
+														<a data-toggle="collapse" href=".comment-collapse-<%=list.get(i).getCommentID()%>" style="color: black;">수정</a>
+														<a onclick="return confirm('정말로 삭제하시겠습니까?')" href="deleteAction.jsp?bbsID=<%=bbsID%>&commentID=<%=list.get(i).getCommentID()%>" style="color: black;">삭제</a>
+														<%
+														}
+														%>
+													</div>
+													<div class="commentItem" style="margin-left: auto;">
+														<a href="#" onclick="window.open('http://localhost:8080/BBS/reporting.jsp?user1name=<%=user1name.getUserName()%>&user2name=<%=username.getUserName()%>','report','width=500,height=500,resizable=no')" style="color: black;">신고</a>
+													</div>
+												</div>
+												<form method="post" action="updateAction.jsp?bbsID=<%=bbsID%>&commentID=<%=list.get(i).getCommentID()%>" id="update-content" aria-expanded="false" class="collapse comment-collapse-<%=list.get(i).getCommentID()%>">
+													<div class="form-group">
+														<textarea class="form-control" name="commentContent" maxlength="1024" style="height: 80px;"><%=list.get(i).getCommentContent().replaceAll(" ", "&nbsp;").replaceAll("<", "&lt;").replaceAll(">","&gt;").replaceAll("\n", "") %></textarea>
+														<input type="submit" class="btn btn-primary" value="수정">											
+													</div>
+												</form>
+											</div>
+											<p class="collapse comment-collapse-<%=list.get(i).getCommentID()%> in"><%=list.get(i).getCommentContent().replaceAll(" ", "&nbsp;").replaceAll("<", "&lt;").replaceAll(">","&gt;").replaceAll("\n", "<br>") %></p>
+											<div style="text-align: right;">
+												<a data-toggle="collapse" href=".comment-reply-collapse-<%=list.get(i).getCommentID()%>" style="color: black;">답글</a>
+											</div>
+											<form method="post" action="replyAction.jsp?bbsID=<%=bbsID%>&commentID=<%=list.get(i).getCommentID()%>" id="reply-content" aria-expanded="false" class="collapse comment-reply-collapse-<%=list.get(i).getCommentID()%>">
+												<div class="form-group">
+													<textarea class="form-control" placeholder="답글달기" name="replyContent" maxlength="1024" style="height: 80px;"></textarea>
+													<input type="submit" class="btn btn-primary" value="작성">											
+												</div>
+											</form>
+										</div>
+									</div>
+									<%
+									BbsReplyDAO bbsReplyDAO = new BbsReplyDAO();
+									ArrayList<BbsReply> replyList = bbsReplyDAO.getList(list.get(i).getCommentID());
+									for(int j = 0; j < replyList.size();j++){
+										User R_username = new UserDAO().getUser(replyList.get(j).getUserID());
+									%>
+										<div style="border-bottom: 1px solid #dddddd; display: flex;">
+											<p style="font-size: 20px; padding-top: 7px;">┗</p>
+											<div style="padding-bottom: 10px; padding-top: 10px; width: 99%">						
+												<div style="margin-bottom: 10px;">
+													<div class="replyContainer" style="display: flex;">
+														<div class="replyItem">
+															<span style="font-size: 18px"><%=R_username.getUserName()%></span>
+															<span style="color: #aaaaaa;">(<%=replyList.get(j).getReplyDate()%>)</span>
+															<%
+															if(userID != null && userID.equals(replyList.get(j).getUserID())){
+															%>
+															<a data-toggle="collapse" href=".reply-collapse-<%=replyList.get(j).getReplyID()%>" style="color: black;">수정</a>
+															<a onclick="return confirm('정말로 삭제하시겠습니까?')" href="deleteAction.jsp?bbsID=<%=bbsID%>&replyID=<%=replyList.get(j).getReplyID()%>" style="color: black;">삭제</a>
+															<%
+															}
+															%>
+														</div>
+														<div class="replyItem" style="margin-left: auto;" >
+															<a href="#" onclick="window.open('http://localhost:8080/BBS/reporting.jsp?user1name=<%=user1name.getUserName()%>&user2name=<%=R_username.getUserName()%>','report','width=500,height=500,resizable=no')" style="color: black;">신고</a>
+														</div>
+													</div>
+													<form method="post" action="updateAction.jsp?bbsID=<%=bbsID%>&replyID=<%=replyList.get(j).getReplyID()%>" id="update-content" aria-expanded="false" class="collapse reply-collapse-<%=replyList.get(j).getReplyID()%>">
+														<div class="form-group">
+															<textarea class="form-control" name="replyContent" maxlength="1024" style="height: 80px;"><%=replyList.get(j).getReplyContent().replaceAll(" ", "&nbsp;").replaceAll("<", "&lt;").replaceAll(">","&gt;").replaceAll("\n", "") %></textarea>
+															<input type="submit" class="btn btn-primary" value="수정">									
+														</div>
+													</form>
+												</div>
+												<p class="collapse reply-collapse-<%=replyList.get(j).getReplyID()%> in"><%=replyList.get(j).getReplyContent().replaceAll(" ", "&nbsp;").replaceAll("<", "&lt;").replaceAll(">","&gt;").replaceAll("\n", "<br>") %></p>
+											</div>
+										</div>
+									<%
+									}
+									%>
+								<%
+								}
+								%>
+								<form method="post" action="commentAction.jsp?bbsID=<%=bbsID%>">
+									<table class="table" cellpading="0">
+										<tbody>
+											<tr>
+												<td>
+													<textarea class="form-control" placeholder="댓글달기" name="commentContent" maxlength="1024" style="height: 80px;"></textarea>
+												</td>
+												<td style="width: 0%">
+													<input style="height: 80px; background-color: white; color: black;" type="submit" class="btn btn-primary pull-right" value="등록">
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</form>
+							</td>
+						</tr>
+					</tbody>		
+				</table>
 		</div>
 	</div>
 	<script src="http://code.jquery.com/jquery-3.1.1.min.js"></script>
