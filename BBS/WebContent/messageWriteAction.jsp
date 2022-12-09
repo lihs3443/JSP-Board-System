@@ -28,21 +28,7 @@
 		}
 		else{
 			String receiver = request.getParameter("message-userName");
-			if(message.getUserID() == null || message.getMessageContent() == null){
-				script.println("alert('입력이 안 된 사항이 있습니다.')");
-				script.println("history.back()");
-			}
-			else{
-				MessageDAO messageDAO = new MessageDAO();
-				int result = messageDAO.writeMessage(receiver, userID, message.getMessageContent());
-				if(result == -1){
-					script.println("alert('쪽지 보내기에 실패하였습니다.')");
-					script.println("history.back()");
-				}
-				else{
 					script.println("location.href = 'message.jsp'");
-				}
-			}
 		}
 		script.println("</script>");
 	%>

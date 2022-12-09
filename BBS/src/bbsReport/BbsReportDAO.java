@@ -53,7 +53,7 @@ public class BbsReportDAO {
 	}
 	
 	public ArrayList<BbsReport> getList() {
-		String SQL = "select * from bbs_report order by reportID desc";
+		String SQL = "select * from bbs_report order by reportID asc";
 		ArrayList<BbsReport> list = new ArrayList<BbsReport>();
 		try {
 			PreparedStatement pstmt = conn.prepareStatement(SQL);

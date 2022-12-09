@@ -109,12 +109,14 @@
 							int Approval=0;
 					%>
 					<script>
-						function showApproval(v,n,approval){
-							document.getElementById("report-content-"+n).innerText = v;
+						function showApproval(v,n){
+							document.getElementById("report-content-"+n).value = v;
+							var ReportID='<%= list.get(i).getReportID() %>';
+							var Dispose=document.dispose;
 							if(v == "처리")
-								Approval = 1;
+								Dispose.action="disposeAction.jsp?reportID=1&Approval=1";
 							if(v == "미처리")
-								Approval = 2;
+								Dispose.action="disposeAction.jsp?reportID=1&Approval=2";
 					}
 					</script>
 					<tr class="report_list">
@@ -123,10 +125,10 @@
 						<td><%= list.get(i).getReportedUserID() %></td>
 						<td><%= bbsReportDAO.getReportType(list.get(i).getReportType()) %></td>
 						<td><%= list.get(i).getReportDate()%></td>
-						<form method="post" action="disposeAction.jsp?reportID=<%= list.get(i).getReportID() %>&Approval=<%=Approval%>">
+						<form name="dispose" method="post" action="disposeAction.jsp?reportID=<%= list.get(i).getReportID() %>">
 							<td style="width: 100px; box-sizing: border-box;">
 								<span class="dropdown">
-									<button class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" style="width: 100%; text-align: right;"><div id=report-content-<%= list.get(i).getReportID() %> style="display: inline-block; float: left;">-</div><span class="caret"></span></button>
+									<button class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" style="width: 100%; text-align: center;"><input type="button" id=report-content-<%= list.get(i).getReportID() %> name="ApprovalText" value="-" style="border: none; background: none;"><div style="display: inline-block; float: right;"><span class="caret"></span></div></button>
 									<ul class="dropdown-menu">
 										<li><a class="report-content-item" onclick="showApproval(this.innerText,<%= list.get(i).getReportID() %>)">처리</a></li>
 										<li><a class="report-content-item" onclick="showApproval(this.innerText,<%= list.get(i).getReportID() %>)">미처리</a></li>

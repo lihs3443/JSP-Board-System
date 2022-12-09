@@ -42,7 +42,7 @@
 			script.println("</script>");
 		}
 		Bbs bbs = new BbsDAO().getBbs(bbsID);
-		User user = new UserDAO().getUser(userID);
+		User user = new UserDAO().getUser(bbs.getUserID());
 	%>
 
 	<nav class="navbar navbar-default"> <!-- 웹사이트 전반적인 구성 -->

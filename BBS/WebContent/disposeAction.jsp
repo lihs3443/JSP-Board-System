@@ -26,8 +26,23 @@
 			script.println("</script>");
 		}
 		else{
+				/* 여기 수정 해야함 ApprovalText== null */
 				int reportID = Integer.parseInt(request.getParameter("reportID"));
-				int approval = Integer.parseInt(request.getParameter("Approval"));
+				int approval = 0;
+				if(request.getParameter("ApprovalText")=="처리")
+				{
+					script.println("<script>");
+					script.println("alert('처리')");
+					script.println("</script>");
+					approval = 1;
+				}
+				if(request.getParameter("ApprovalText")=="미처리")
+				{
+					script.println("<script>");
+					script.println("alert('미처리')");
+					script.println("</script>");
+					approval = 2;
+				}
 				BbsReportDAO reportDAO = new BbsReportDAO();
 				int result = reportDAO.disposeReport(reportID, approval);
 				if(result == -1){
@@ -38,18 +53,10 @@
 				}
 				else{
 					result = reportDAO.checkingBanID(reportID);
-					if(result == -1){
-						script.println("<script>");
-						script.println("alert('유저관리에 실패하였습니다.')");
-						script.println("location.href = 'report.jsp'");
-						script.println("</script>");
-					}
-					else{
 						script.println("<script>");
 						script.println("alert('처리 성공.')");
 						script.println("location.href = 'report.jsp'");
 						script.println("</script>");
-					}
 				}
 		}
 	%>
